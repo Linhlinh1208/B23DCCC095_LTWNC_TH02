@@ -7,15 +7,20 @@ import { ExerciseRow } from '../features/catalog/ExerciseRow';
 import { removeVietnameseTones } from '../utils/format';
 import { useSessionStore } from '../features/session/useSessionStore';
 import { useSavedStore } from '../features/saved/useSavedStore';
+import { useRoutines, useRoutineDispatch } from '../features/routines/RoutineContext';
 
 export const CatalogPage: React.FC = () => {
   const [keyword, setKeyword] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<string>('Tất cả');
   const [sortBy, setSortBy] = useState<'default' | 'name' | 'duration'>('default');
 
+  const routines = useRoutines();
+  const routineDispatch = useRoutineDispatch();
+  const [activeRoutineId, setActiveRoutineId] = useState<string>('');
+
   const debouncedKeyword = useDebounce(keyword, 300);
 
-  // Ràng buộc kỹ thuật: Tên hàm bắt buộc
+  // Ràng buộc kỹ thuật bắt buộc: Tên hàm phải là handleKeywordShift
   const handleKeywordShift = (e: React.ChangeEvent<HTMLInputElement>) => {
     setKeyword(e.target.value);
   };
@@ -55,45 +60,95 @@ export const CatalogPage: React.FC = () => {
     return result;
   }, [debouncedKeyword, selectedGroup, sortBy]);
 
-  // Nối Zustand store
   const startSession = useSessionStore((s) => s.startSession);
   const addToSession = useSessionStore((s) => s.addToSession);
+  const sessionQueue = useSessionStore((s) => s.queue);
   const savedIds = useSavedStore((s) => s.ids);
   const toggleSave = useSavedStore((s) => s.toggle);
 
   const isSaved = useCallback((id: string) => savedIds.includes(id), [savedIds]);
 
+  // Alert khi Bắt đầu
   const handleStart = useCallback(
-    (_exercise: Exercise, index: number) => {
-      // Buổi tập là danh sách đang lọc/sắp xếp, bắt đầu từ bài đó
+    (exercise: Exercise, index: number) => {
       startSession(filteredExercises, index);
+      alert(`Bắt đầu buổi tập với bài: "${exercise.name}"!`);
     },
     [filteredExercises, startSession]
   );
 
+  // Alert khi thêm vào buổi tập
   const handleAddToSession = useCallback(
     (exercise: Exercise) => {
+      const alreadyInSession = sessionQueue.some((item) => item.id === exercise.id);
+      if (alreadyInSession) {
+        alert(`Bài tập "${exercise.name}" đã có trong buổi tập rồi!`);
+        return;
+      }
       addToSession(exercise);
+      alert(`Đã thêm "${exercise.name}" vào danh sách buổi tập!`);
     },
-    [addToSession]
+    [sessionQueue, addToSession]
+  );
+
+  // Alert khi lưu / bỏ lưu bài tập
+  const handleToggleSaveWithAlert = useCallback(
+    (id: string) => {
+      const currentlySaved = savedIds.includes(id);
+      toggleSave(id);
+      if (currentlySaved) {
+        alert('Đã bỏ lưu bài tập!');
+      } else {
+        alert('Đã lưu bài tập vào danh sách yêu thích!');
+      }
+    },
+    [savedIds, toggleSave]
+  );
+
+  // Alert khi thêm vào giáo án
+  const handleAddToRoutine = useCallback(
+    (exerciseId: string) => {
+      const currentTargetId = activeRoutineId || routines[0]?.id;
+      if (!currentTargetId) {
+        alert('Vui lòng sang trang "Giáo án" tạo ít nhất 1 giáo án trước!');
+        return;
+      }
+
+      const targetRoutine = routines.find((r) => r.id === currentTargetId);
+      const exObj = EXERCISES.find((e) => e.id === exerciseId);
+      const exName = exObj ? exObj.name : exerciseId;
+
+      if (targetRoutine?.exerciseIds.includes(exerciseId)) {
+        alert(`Bài tập "${exName}" đã có sẵn trong giáo án "${targetRoutine.name}" rồi!`);
+        return;
+      }
+
+      routineDispatch({
+        type: 'addExercise',
+        payload: { routineId: currentTargetId, exerciseId },
+      });
+      alert(`Đã thêm "${exName}" vào giáo án "${targetRoutine?.name}"!`);
+    },
+    [activeRoutineId, routines, routineDispatch]
   );
 
   const itemData = useMemo(
     () => ({
       items: filteredExercises,
       onStart: handleStart,
-      onToggleSave: toggleSave,
+      onToggleSave: handleToggleSaveWithAlert,
       onAddToSession: handleAddToSession,
+      onAddToRoutine: handleAddToRoutine,
       isSaved,
     }),
-    [filteredExercises, handleStart, toggleSave, handleAddToSession, isSaved]
+    [filteredExercises, handleStart, handleToggleSaveWithAlert, handleAddToSession, handleAddToRoutine, isSaved]
   );
 
   return (
     <div className="catalog-page" style={{ padding: '1rem', paddingBottom: '80px' }}>
       <h2>Kho bài tập</h2>
 
-      <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <div>
           <label htmlFor="search-input" style={{ fontWeight: 600 }}>Tìm kiếm: </label>
           <input
@@ -102,7 +157,7 @@ export const CatalogPage: React.FC = () => {
             placeholder="Tìm theo tên bài hoặc HLV..."
             value={keyword}
             onChange={handleKeywordShift}
-            style={{ padding: '6px 10px', minWidth: '240px', borderRadius: '4px', border: '1px solid #ccc' }}
+            style={{ padding: '6px 10px', minWidth: '200px' }}
           />
         </div>
 
@@ -112,7 +167,7 @@ export const CatalogPage: React.FC = () => {
             id="group-select"
             value={selectedGroup}
             onChange={(e) => setSelectedGroup(e.target.value)}
-            style={{ padding: '6px 8px', borderRadius: '4px', border: '1px solid #ccc' }}
+            style={{ padding: '6px 8px' }}
           >
             <option value="Tất cả">Tất cả</option>
             {GROUPS.map((g: MuscleGroup) => (
@@ -127,21 +182,40 @@ export const CatalogPage: React.FC = () => {
             id="sort-select"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'default' | 'name' | 'duration')}
-            style={{ padding: '6px 8px', borderRadius: '4px', border: '1px solid #ccc' }}
+            style={{ padding: '6px 8px' }}
           >
             <option value="default">Mặc định</option>
             <option value="name">Tên A–Z</option>
             <option value="duration">Thời lượng tăng dần</option>
           </select>
         </div>
+
+        {routines.length > 0 && (
+          <div>
+            <label htmlFor="target-routine" style={{ fontWeight: 600, color: '#2563eb' }}>
+              Giáo án đang chọn: 
+            </label>{' '}
+            <select
+              id="target-routine"
+              value={activeRoutineId || routines[0]?.id}
+              onChange={(e) => setActiveRoutineId(e.target.value)}
+              style={{ padding: '6px 8px', fontWeight: 600 }}
+            >
+              {routines.map((r) => (
+                <option key={r.id} value={r.id}>{r.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
-      <p style={{ fontWeight: 'bold', margin: '0.75rem 0', color: filteredExercises.length > 0 ? '#1f2937' : '#dc2626' }}>
+      <p style={{ fontWeight: 'bold', margin: '0.75rem 0' }}>
         {filteredExercises.length > 0
           ? `Tìm thấy ${filteredExercises.length} bài tập`
           : 'Không tìm thấy bài tập nào'}
       </p>
 
+      {/* Hàng Tiêu Đề Cột Kho Bài Tập */}
       <div
         style={{
           display: 'flex',
@@ -156,12 +230,12 @@ export const CatalogPage: React.FC = () => {
           boxSizing: 'border-box',
         }}
       >
-        <div style={{ width: '60px', flexShrink: 0 }}>STT</div>
-        <div style={{ flex: '2', paddingRight: '1rem' }}>Tên bài tập</div>
-        <div style={{ flex: '1.5', paddingRight: '1rem' }}>Huấn luyện viên</div>
-        <div style={{ width: '100px', flexShrink: 0 }}>Nhóm cơ</div>
-        <div style={{ width: '100px', flexShrink: 0 }}>Thời lượng</div>
-        <div style={{ width: '220px', flexShrink: 0, textAlign: 'right' }}>Thao tác</div>
+        <div style={{ width: '50px', flexShrink: 0 }}>STT</div>
+        <div style={{ flex: '2', paddingRight: '0.75rem' }}>Tên bài tập</div>
+        <div style={{ flex: '1.5', paddingRight: '0.75rem' }}>Huấn luyện viên</div>
+        <div style={{ width: '80px', flexShrink: 0 }}>Nhóm cơ</div>
+        <div style={{ width: '70px', flexShrink: 0 }}>Thời lượng</div>
+        <div style={{ width: '300px', flexShrink: 0, textAlign: 'right' }}>Thao tác</div>
       </div>
 
       {filteredExercises.length > 0 && (
