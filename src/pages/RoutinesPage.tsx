@@ -12,7 +12,10 @@ export const RoutinesPage: React.FC = () => {
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = nameInput.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      setErrorMessage('Tên giáo án không được để trống');
+      return;
+    }
 
     const isDuplicate = routines.some(
       (r) => r.name.toLowerCase() === trimmed.toLowerCase()
