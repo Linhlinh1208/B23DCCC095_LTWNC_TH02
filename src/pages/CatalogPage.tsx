@@ -5,54 +5,47 @@ import { EXERCISES, GROUPS } from '../data/exercises';
 import { useDebounce } from '../hooks/useDebounce';
 import { ExerciseRow } from '../features/catalog/ExerciseRow';
 import { removeVietnameseTones } from '../utils/format';
+import { useSessionStore } from '../features/session/useSessionStore';
+import { useSavedStore } from '../features/saved/useSavedStore';
 
 export const CatalogPage: React.FC = () => {
   const [keyword, setKeyword] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<string>('Tất cả');
   const [sortBy, setSortBy] = useState<'default' | 'name' | 'duration'>('default');
 
-  // Debounce 300ms
   const debouncedKeyword = useDebounce(keyword, 300);
 
-  // Ràng buộc kỹ thuật bắt buộc: Tên hàm phải là handleKeywordShift
+  // Ràng buộc kỹ thuật: Tên hàm bắt buộc
   const handleKeywordShift = (e: React.ChangeEvent<HTMLInputElement>) => {
     setKeyword(e.target.value);
   };
 
-  // LOGIC LỌC TỐI ƯU TOÀN DIỆN
   const filteredExercises = useMemo(() => {
-    // 1. Chuẩn hóa chuỗi tìm kiếm: xóa khoảng trắng thừa, đưa về chữ thường
     const rawKw = debouncedKeyword.trim().replace(/\s+/g, ' ').toLowerCase();
-
-    // 2. Tạo thêm bản không dấu của từ khóa tìm kiếm
     const nonToneKw = removeVietnameseTones(rawKw);
 
     let result = EXERCISES;
 
     if (rawKw) {
       result = result.filter((ex) => {
-        // Chuẩn hóa tên bài và HLV sang thường và NFC
         const nameLower = ex.name.normalize('NFC').toLowerCase();
         const trainerLower = ex.trainer.normalize('NFC').toLowerCase();
-
-        // Bản không dấu của dữ liệu
         const nameNonTone = removeVietnameseTones(nameLower);
         const trainerNonTone = removeVietnameseTones(trainerLower);
 
-        // Khớp có dấu HOẶC khớp không dấu
-        const matchName = nameLower.includes(rawKw) || nameNonTone.includes(nonToneKw);
-        const matchTrainer = trainerLower.includes(rawKw) || trainerNonTone.includes(nonToneKw);
-
-        return matchName || matchTrainer;
+        return (
+          nameLower.includes(rawKw) ||
+          nameNonTone.includes(nonToneKw) ||
+          trainerLower.includes(rawKw) ||
+          trainerNonTone.includes(nonToneKw)
+        );
       });
     }
 
-    // Lọc theo nhóm cơ
     if (selectedGroup !== 'Tất cả') {
       result = result.filter((ex) => ex.group === selectedGroup);
     }
 
-    // Sắp xếp
     if (sortBy === 'name') {
       result = [...result].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
     } else if (sortBy === 'duration') {
@@ -62,25 +55,44 @@ export const CatalogPage: React.FC = () => {
     return result;
   }, [debouncedKeyword, selectedGroup, sortBy]);
 
-  const handleStart = useCallback((_exercise: Exercise, _index: number) => {}, []);
-  const handleToggleSave = useCallback((_id: string) => {}, []);
-  const handleAddToSession = useCallback((_exercise: Exercise) => {}, []);
+  // Nối Zustand store
+  const startSession = useSessionStore((s) => s.startSession);
+  const addToSession = useSessionStore((s) => s.addToSession);
+  const savedIds = useSavedStore((s) => s.ids);
+  const toggleSave = useSavedStore((s) => s.toggle);
+
+  const isSaved = useCallback((id: string) => savedIds.includes(id), [savedIds]);
+
+  const handleStart = useCallback(
+    (_exercise: Exercise, index: number) => {
+      // Buổi tập là danh sách đang lọc/sắp xếp, bắt đầu từ bài đó
+      startSession(filteredExercises, index);
+    },
+    [filteredExercises, startSession]
+  );
+
+  const handleAddToSession = useCallback(
+    (exercise: Exercise) => {
+      addToSession(exercise);
+    },
+    [addToSession]
+  );
 
   const itemData = useMemo(
     () => ({
       items: filteredExercises,
       onStart: handleStart,
-      onToggleSave: handleToggleSave,
+      onToggleSave: toggleSave,
       onAddToSession: handleAddToSession,
+      isSaved,
     }),
-    [filteredExercises, handleStart, handleToggleSave, handleAddToSession]
+    [filteredExercises, handleStart, toggleSave, handleAddToSession, isSaved]
   );
 
   return (
-    <div className="catalog-page" style={{ padding: '1rem' }}>
+    <div className="catalog-page" style={{ padding: '1rem', paddingBottom: '80px' }}>
       <h2>Kho bài tập</h2>
 
-      {/* Thanh bộ lọc */}
       <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <div>
           <label htmlFor="search-input" style={{ fontWeight: 600 }}>Tìm kiếm: </label>
@@ -124,14 +136,12 @@ export const CatalogPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Thống kê kết quả */}
       <p style={{ fontWeight: 'bold', margin: '0.75rem 0', color: filteredExercises.length > 0 ? '#1f2937' : '#dc2626' }}>
         {filteredExercises.length > 0
           ? `Tìm thấy ${filteredExercises.length} bài tập`
           : 'Không tìm thấy bài tập nào'}
       </p>
 
-      {/* Tiêu đề cột */}
       <div
         style={{
           display: 'flex',
@@ -154,7 +164,6 @@ export const CatalogPage: React.FC = () => {
         <div style={{ width: '220px', flexShrink: 0, textAlign: 'right' }}>Thao tác</div>
       </div>
 
-      {/* Virtualization List */}
       {filteredExercises.length > 0 && (
         <List
           height={560}

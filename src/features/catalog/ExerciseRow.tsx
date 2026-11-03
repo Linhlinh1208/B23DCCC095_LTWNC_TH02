@@ -8,15 +8,18 @@ interface ExerciseRowProps {
   style: CSSProperties;
   data: {
     items: Exercise[];
-    onStart?: (exercise: Exercise, index: number) => void;
-    onToggleSave?: (id: string) => void;
-    onAddToSession?: (exercise: Exercise) => void;
+    onStart: (exercise: Exercise, index: number) => void;
+    onToggleSave: (id: string) => void;
+    onAddToSession: (exercise: Exercise) => void;
+    isSaved: (id: string) => boolean;
   };
 }
 
 const ExerciseRowComponent: React.FC<ExerciseRowProps> = ({ index, style, data }) => {
   const exercise = data.items[index];
   if (!exercise) return null;
+
+  const saved = data.isSaved(exercise.id);
 
   return (
     <div
@@ -65,22 +68,27 @@ const ExerciseRowComponent: React.FC<ExerciseRowProps> = ({ index, style, data }
       <div style={{ width: '220px', flexShrink: 0, display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
         <button
           type="button"
-          onClick={() => data.onStart?.(exercise, index)}
+          onClick={() => data.onStart(exercise, index)}
           style={{ padding: '4px 8px', cursor: 'pointer' }}
         >
           Bắt đầu
         </button>
         <button
           type="button"
-          aria-label="Lưu bài tập"
-          onClick={() => data.onToggleSave?.(exercise.id)}
-          style={{ padding: '4px 8px', cursor: 'pointer' }}
+          aria-label={saved ? 'Bỏ lưu' : 'Lưu bài tập'}
+          onClick={() => data.onToggleSave(exercise.id)}
+          style={{
+            padding: '4px 8px',
+            cursor: 'pointer',
+            color: saved ? '#eab308' : '#6b7280',
+            fontSize: '1rem',
+          }}
         >
-          ☆
+          {saved ? '★' : '☆'}
         </button>
         <button
           type="button"
-          onClick={() => data.onAddToSession?.(exercise)}
+          onClick={() => data.onAddToSession(exercise)}
           style={{ padding: '4px 8px', cursor: 'pointer' }}
         >
           + Buổi tập

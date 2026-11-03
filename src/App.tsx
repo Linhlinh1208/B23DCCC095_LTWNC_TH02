@@ -3,6 +3,8 @@ const BUILD_TAG = "wk-5182";
 import React from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { CatalogPage } from './pages/CatalogPage';
+import { SavedPage } from './pages/SavedPage';
+import { SessionBar } from './features/session/SessionBar';
 
 export default function App() {
   return (
@@ -55,11 +57,20 @@ export default function App() {
         <main>
           <Routes>
             <Route path="/" element={<CatalogPage />} />
-            <Route path="/saved" element={<div style={{ padding: '1rem' }}>Trang Đã lưu (Phần 2)</div>} />
-            <Route path="/routines" element={<div style={{ padding: '1rem' }}>Danh sách giáo án (Phần 3)</div>} />
-            <Route path="/routines/:id" element={<div style={{ padding: '1rem' }}>Chi tiết giáo án (Phần 3)</div>} />
+            <Route path="/saved" element={<SavedPage />} />
+            <Route
+              path="/routines"
+              element={<div style={{ padding: '1rem' }}>Danh sách giáo án (Phần 3)</div>}
+            />
+            <Route
+              path="/routines/:id"
+              element={<div style={{ padding: '1rem' }}>Chi tiết giáo án (Phần 3)</div>}
+            />
           </Routes>
         </main>
+
+        {/* Thanh đồng hồ buổi tập cố định ở đáy mọi trang */}
+        <SessionBar />
       </div>
     </BrowserRouter>
   );
