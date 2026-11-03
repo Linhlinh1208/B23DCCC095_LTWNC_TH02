@@ -34,30 +34,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">96% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/25</span>
+                <span class='fraction'>24/25</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/16</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">91.66% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>11/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">93.75% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/16</span>
+                <span class='fraction'>15/16</span>
             </div>
         
             
@@ -72,7 +72,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -195,34 +195,34 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">14x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -312,34 +312,34 @@
 import { useSessionStore } from './useSessionStore';
 import { CountdownBar } from './CountdownBar';
 &nbsp;
-export const <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >SessionBar: React.FC = () =&gt; {</span></span>
+export const SessionBar: React.FC = () =&gt; {
   // Từng selector riêng biệt chống render thừa
-  const isRunning = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useSessionStore((s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.isRunning)</span>;</span>
-  const queueLength = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useSessionStore((s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.queue.length)</span>;</span>
-  const currentIndex = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useSessionStore((s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.currentIndex)</span>;</span>
-  const currentExercise = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useSessionStore((s</span>) =&gt;</span>
-<span class="cstat-no" title="statement not covered" >    s.currentIndex &gt;= 0 &amp;&amp; s.currentIndex &lt; s.queue.length</span>
+  const isRunning = useSessionStore((s) =&gt; s.isRunning);
+  const queueLength = useSessionStore((s) =&gt; s.queue.length);
+  const currentIndex = useSessionStore((s) =&gt; s.currentIndex);
+  const currentExercise = useSessionStore((s) =&gt;
+    s.currentIndex &gt;= 0 &amp;&amp; s.currentIndex &lt; s.queue.length
       ? s.queue[s.currentIndex]
       : null
   );
 &nbsp;
-  const toggleRun = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useSessionStore((s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.toggleRun)</span>;</span>
-  const next = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useSessionStore((s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.next)</span>;</span>
-  const prev = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useSessionStore((s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.prev)</span>;</span>
-  const tick = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >useSessionStore((s</span>) =&gt; <span class="cstat-no" title="statement not covered" >s.tick)</span>;</span>
+  const toggleRun = useSessionStore((s) =&gt; s.toggleRun);
+  const next = useSessionStore((s) =&gt; s.next);
+  const prev = useSessionStore((s) =&gt; s.prev);
+  const tick = useSessionStore((s) =&gt; s.tick);
 &nbsp;
   // Đồng hồ chạy từng giây khi isRunning = true
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >  useEffect(() =&gt; {</span></span>
-<span class="cstat-no" title="statement not covered" >    if (!isRunning) <span class="cstat-no" title="statement not covered" >return;</span></span>
+  useEffect(() =&gt; {
+    if (!isRunning) return;
 &nbsp;
-    const timer = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >setInterval(() =&gt; {</span></span>
+    const timer = <span class="fstat-no" title="function not covered" >setInterval(() =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >      tick();</span>
     }, 1000);
 &nbsp;
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >    return () =&gt; <span class="cstat-no" title="statement not covered" >c</span>learInterval(timer);</span></span>
+    return () =&gt; clearInterval(timer);
   }, [isRunning, tick]);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;div
       style={{
         position: 'fixed',
@@ -432,7 +432,7 @@ export const <span class="cstat-no" title="statement not covered" ><span class="
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-11-03T09:23:37.024Z
+                at 2026-11-03T09:56:26.419Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
